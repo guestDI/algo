@@ -11,21 +11,23 @@ class Node {
       this.root = null;
     }
     insert(value) {
-      const node = new Node(value);
-      if (!this.root) {
-        this.root = node;
+      const newNode = new Node(value);
+      if (this.root === null) {
+        this.root = newNode;
       } else {
         let currentNode = this.root;
         while (true) {
           if (value < currentNode.value) {
+            //Left
             if (!currentNode.left) {
-              currentNode.left = node;
+              currentNode.left = newNode;
               return this;
             }
             currentNode = currentNode.left;
           } else {
+            //Right
             if (!currentNode.right) {
-              currentNode.right = node;
+              currentNode.right = newNode;
               return this;
             }
             currentNode = currentNode.right;
@@ -36,20 +38,18 @@ class Node {
     lookup(value) {
       if (!this.root) {
         return false;
-      } else {
-        let currentNode = this.root;
-        while (currentNode) {
-          if (value === currentNode.value) {
-            return currentNode;
-          } else if (value < currentNode.value) {
-            currentNode = currentNode.left;
-          } else {
-            currentNode = currentNode.right;
-          }
-        }
-  
-        return false;
       }
+      let currentNode = this.root;
+      while (currentNode) {
+        if (value < currentNode.value) {
+          currentNode = currentNode.left;
+        } else if (value > currentNode.value) {
+          currentNode = currentNode.right;
+        } else if (currentNode.value === value) {
+          return currentNode;
+        }
+      }
+      return null
     }
     remove(value) {
       if (!this.root) {
@@ -130,6 +130,45 @@ class Node {
         }
       }
     }
+      //BFS
+    breadthFirstSearch() {
+      let currentNode = this.root;
+      const list = [];
+      const queue = [];
+      queue.push(currentNode);
+      while(queue.length) {
+        currentNode = queue.shift();
+        list.push(currentNode.value);
+        if(currentNode.left){
+          queue.push(currentNode.left);
+        }
+        
+        if(currentNode.right){
+          queue.push(currentNode.right);
+        }
+      }
+  
+      return list;
+    }
+    breadthFirstSearchRec(queue, list) {
+      if(!queue.length) {
+        return list;
+      }
+  
+      let currentNode = queue.shift();
+      list.push(currentNode.value);
+      if(currentNode.left){
+        queue.push(currentNode.left);
+      }
+        
+      if(currentNode.right){
+        queue.push(currentNode.right);
+      }
+      
+  
+      return this.breadthFirstSearchRec(queue, list)
+      
+    }
   }
   
   const tree = new BinarySearchTree();
@@ -140,8 +179,9 @@ class Node {
   tree.insert(170)
   tree.insert(15)
   tree.insert(1)
-  console.log(JSON.stringify(traverse(tree.root)))
-  console.log(tree.lookup(21))
+  console.log(tree.breadthFirstSearch())
+  console.log(tree.breadthFirstSearchRec([tree.root], []))
+  // JSON.stringify(traverse(tree.root))
   
   //     9
   //  4     20
@@ -153,8 +193,6 @@ class Node {
     tree.right = node.right === null ? null : traverse(node.right);
     return tree;
   }
-  
-  
   
   
   
@@ -175,5 +213,9 @@ var isSameTree = function(p, q) {
     if(p === null && q === null) return true;
     if(p === null || q === null) return false;
     
-    return p.val === q.val && isSameTree(p.left, q.left) && isSameTree(p.right, q.right)
-};
+    if(p && q) {
+      return p.val === q.val && isSameTree(p.left, q.left) && isSameTree(p.right, q.right)
+    }
+
+    return true;
+};  
